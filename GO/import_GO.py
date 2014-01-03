@@ -3,6 +3,7 @@ from org.neo4j.graphdb import *
 from org.neo4j.index.lucene.unsafe.batchinsert import LuceneBatchInserterIndexProvider
 from org.apache.lucene.search import TermQuery
 from org.apache.lucene.index import Term 
+
 import xml.sax  #event based ie. proc. 
 from math import fmod
 from org.neo4j.helpers.collection import MapUtil
