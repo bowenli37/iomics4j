@@ -1,12 +1,15 @@
 #!/bin/sh
 
-#set the directories
-targetdir=/export2/home/uesu/opt/batch-import-20/taxo_index2
+#set the directories and subdirectories
+targetdir=$HOME/opt/batch-import-20/taxo_index2
+taxodump=$HOME/downloads/taxonomy
+
+batchdir=$HOME/opt/batch-import-20/
+
 mkdir -p $targetdir/nodes
 mkdir -p $targetdir/rels
 cd $targetdir
 
-taxodump=/export2/home/uesu/downloads/taxonomy
 
 #load taxonomic DUMP from ftp in CWD
 wget -P $taxodump -m ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/
@@ -67,23 +70,19 @@ perl -aln -F"\t" -e 'BEGIN{print qq(gi:int:giid\ttaxid:int:ncbitaxid\tgi2tax)} p
 #pre-initialising::setting up sqlite DB
 
 #executing the gi database
-~/opt/rapsearch2neo4j.pl K01963 rels/reads2gi.rel
+$HOME/opt/rapsearch2neo4j.pl K01963 rels/reads2gi.rel
 
 #Building the graphdb 
 #just gi and taxid
 mvn clean compile exec:java -Dexec.mainClass="org.neo4j.batchimport.Importer" -Dexec.args="graph.db taxo3/nodes/tax_nodes,taxo3/nodes/gi_nodes,taxo3/nodes/read_nodes taxo3/rels/tax2tax,taxo3/rels/gi2tax.rel,taxo3/rels/reads2gi.rel"
 
-#with reads
+#gi,taxid and reads
 mvn clean compile exec:java -Dexec.mainClass="org.neo4j.batchimport.Importer" -Dexec.args="graph.db taxo3/nodes/tax_nodes,taxo3/nodes/gi_nodes,taxo3/nodes/read_nodes taxo3/rels/tax2tax,taxo3/rels/gi2tax.rel,taxo3/rels/reads2gi.rel"
 
-#misc
-##
-#
-##Setting up sqlite::creating tables still need why? cause the perl script needs it
-#sqlite3 ''
-#
-#
-#
+#Outstanding
+##Setting up sqlite::creating tables
+
+
 #
 #perl -aln -F"\\t\\|\\t" -e 'print qq($F[0]\t$F[1]\t$F[2])' $taxodump/nodes.dmp > tax2rank
 #sqlite3 -separator $'\t' sequencing.output/data/gi_taxid_prot.db ".import 'tax2rank' tax2rank"

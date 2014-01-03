@@ -1,0 +1,5 @@
+For this to work you require batch-import to be installed
+
+Prerequisites:
+1. MAVEN APACHE
+2. And you need to set the JAVA_HOME var in your .bashrc
