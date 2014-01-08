@@ -1,0 +1,6 @@
+start n=node:readID('readid:"HWI-ST884:124:D0G92ACXX:1:1101:10761:149051"') 
+match (n)-[r]->(tax)-[:childof*]->(common)
+where r.bitscore > "35"
+with common, count(distinct tax) as leaves
+order by leaves desc
+return common,labels(common),leaves
