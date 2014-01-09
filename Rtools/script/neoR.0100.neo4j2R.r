@@ -6,14 +6,17 @@ library('RJSONIO')
 #--Step1: Set the cypher query 
 #NOTE: Rmbr to escape double quotes accordingly 
 ##################################################
+q<-"start read = node:readID('readid:\"HWI-ST884:57:1:1101:13989:75421#0\"') match read--(ko:`ko`) return ko.name;"
 q<-"start read = node:readID('readid:\"HWI-ST884:57:1:1101:13989:75421#0\"') 
-match read-[r1]->gi-->tax-->tax2-[:childof*]->common_ancestor<-[:childof*]-tax3<--gi<-[r2]-read
-where r1.bitscore > \"35\" and r2.bitscore > \"35\" return common_ancestor;"
+match read-[:rapsearched|childof*]->common_ancestor
+return common_ancestor;"
 
 ##################################################
 #--Step2: query FUNCTION
 ##################################################
-query <- function(querystring) {
+#Cypher queries could be inconsistant (works only for single entry return ie 1 node or 1 property)
+
+query <- function(querystring, type) {
   h = basicTextGatherer()
   curlPerform(url="http://localhost:7474/db/data/cypher",
     postfields=paste('query',curlEscape(querystring), sep='='),
@@ -21,21 +24,30 @@ query <- function(querystring) {
     verbose = FALSE
   )           
   result <- fromJSON(h$value())
-data=setNames(data.frame(
-do.call(rbind,lapply(result$data, function(row) { 
-sapply(row, function(column) column$data)
-}))
-), result$columns)
-  data
+if(type=='property'){
+   data=data.frame(t(sapply(result$data, unlist)))
+   names(data)<-result$columns
+    }
+if(type=='node'){
+data=do.call(rbind,lapply(result$data, function(x) data.frame(unlist(x,recursive=F)$data)))
 }
-
-data<-query(q)
+if(type='relationship'){
+   
+}
+return(data)
+}
+data<-query(q,'property')
+data<-query(q,'node')
 
 ##################################################
-#Saves the output as a data.frame
+#Export subgraph from cypher query into igraph   #
 ##################################################
-save(data, file="output.rda")
+library(igraph)
 
+#attributes file
+
+
+#relationship file
 
 
 ##################################################
