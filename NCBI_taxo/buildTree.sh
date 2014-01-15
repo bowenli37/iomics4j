@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+#Outstanding need to be able to set the ko (currently, its being manually set)
 
 #set the directories and subdirectories
 targetdir=$HOME/opt/batch-import-20/taxo_index2
@@ -37,7 +39,7 @@ perl -aln -F"\\t\\|\\t" -e 'BEGIN{use Storable; %tax2rank=%{retrieve(q(tempfile)
 #6
 #####################################################################
 unzip  $taxodump/gi_taxid_prot.zip -d targetdir/nodes
-perl -aln -F"\t" -e 'BEGIN{print qq(gi:int:giid\tl:label)} print qq($F[0]\tgi)' $taxodump/gi_taxid_prot.dmp > nodes/gi_nodes
+#perl -aln -F"\t" -e 'BEGIN{print qq(gi:int:giid\tl:label)} print qq($F[0]\tgi)' $taxodump/gi_taxid_prot.dmp > nodes/gi_nodes
 #####################################################################
 
 #readnodes########################################
@@ -61,16 +63,26 @@ perl -aln -F"\\t\\|\\t" -e 'BEGIN{print qq(taxid:int:ncbitaxid\ttaxid:int:ncbita
 #gi:int:giid     taxid:int:ncbitaxid link	
 #6       9913	link
 ##################################################################
-perl -aln -F"\t" -e 'BEGIN{print qq(gi:int:giid\ttaxid:int:ncbitaxid\tgi2tax)} print qq($F[0]\t$F[1]\tgi2tax)' $taxodump/gi_taxid_prot.dmp > rels/gi2tax.rel
+#perl -aln -F"\t" -e 'BEGIN{print qq(gi:int:giid\ttaxid:int:ncbitaxid\tgi2tax)} print qq($F[0]\t$F[1]\tgi2tax)' $taxodump/gi_taxid_prot.dmp > rels/gi2tax.rel
 
 #03::read2gi##########################################################
 #readid:string:readID    gi:int:giid     logevalue       bitscore        pair
 #HWI-ST884:57:1:1101:13989:75421#0       325954302       0.21    36.5798 1
 ######################################################################
-#pre-initialising::setting up sqlite DB
+
+
+#pre-initialising::setting up sqlite DB not going to load gi into neo4j 
+sql="\"create table gi2taxid (giid INTEGER primary key, taxid INTEGER); .separator "\t"; .import $taxodump/gi_taxid_prot.dmp gi2taxid\""
+sqlite3 gi2taxid.db "$sql"
+
 
 #executing the gi database
-$HOME/opt/rapsearch2neo4j.pl K01963 rels/reads2gi.rel
+./rapsearch2neo4j.pl K01963 rels/reads2gi.rel
+
+
+#linking the reads to ko 
+perl -aln -F"\t" -e 'print qq($F[0]\tko:K01963\treadko) unless $.==1' taxo_index2/nodes/read_nodes | perl -0777 -pi -e 'print qq(readid:string:readID\tko:string:koid\trelationship\n)' > taxo_index2/rels/reads2ko
+
 
 #Building the graphdb 
 #just gi and taxid

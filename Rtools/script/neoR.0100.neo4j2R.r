@@ -39,12 +39,35 @@ return(data)
 data<-query(q,'property')
 data<-query(q,'node')
 
+
+q<-"start 
+read=node:readID('readid:\"HWI-ST884:124:D0G92ACXX:1:1101:10761:149051\"')
+match read-[:rapsearched]->leaves-[:childof*]->lca
+return count (distinct(leaves)) as le
+order by le desc;"
+
+
 ##################################################
-#Export subgraph from cypher query into igraph   #
+#Recreate igraph object from cypher query	 #
 ##################################################
 library(igraph)
 
 #attributes file
+
+#Cypher query-- Query must return CPDs, KOs and the relationship type
+q="start 
+pathway=node:pathwayid('pathway:\"path:ko00061\"')
+match pathway--(ko:`ko`)-[r]-(cpd:`cpd`)
+return ko,cpd,type(r)"
+
+q="start 
+read=node:readID('readid:\"HWI-ST884:124:D0G92ACXX:1:1101:10761:149051\"')
+match read-[:rapsearched|childof*]->taxa
+return labels(taxa);"
+
+
+lapply(result$data, function(row){
+    ko=row[[1]]$data$ko; cpd=row[[2]]$data[[1]]; relationship=row[[3]]
 
 
 #relationship file

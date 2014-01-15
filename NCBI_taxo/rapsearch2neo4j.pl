@@ -13,7 +13,7 @@ my $dbh = DBI->connect(
 #HWI-ST884:57:1:1101:13989:75421#0/1     gi|163754271|ref|ZP_02161394.1| 56.6667 30      13      0   99       10      55      84      -0.14   37.7354
 
 open(EDGES, "> $ARGV[1]") || die $!; #OUTPUT
-print EDGES "readid:string:readID\ttaxid:int:ncbitaxid\tlogevalue\tbitscore\tpair\n";
+print EDGES "readid:string:readID\ttaxid:int:ncbitaxid\trelationship\tlogevalue\tbitscore\tpair\n";
 
 open(INPUT, "$ARGV[0]") || die $!; 
 while(<INPUT>) { 
@@ -37,5 +37,5 @@ if ($taxid ne '') {
     my $identity=$a[2];
     my $logevalue=$a[10];
     my $bitscore=$a[11];
-    print EDGES "$readID\t$taxid\t$logevalue\t$bitscore\t$pair\n";
+    print EDGES "$readID\t$taxid\trapsearched\t$logevalue\t$bitscore\t$pair\n";
 }}} 
