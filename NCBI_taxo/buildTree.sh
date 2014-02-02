@@ -57,7 +57,8 @@ perl -0777 -ni -e 'print qq(readid:string:readID\tl:label\n$_)' nodes/read_nodes
 #taxid:int:ncbitaxid     taxid:int:ncbitaxid     relationship
 #1       1       child.of
 ##################################################################
-perl -aln -F"\\t\\|\\t" -e 'BEGIN{print qq(taxid:int:ncbitaxid\ttaxid:int:ncbitaxid\trelationship)} print qq($F[0]\t$F[1]\tchildof)' $taxodump/nodes.dmp > rels/tax2tax.rel
+#perl -aln -F"\\t\\|\\t" -e 'BEGIN{print qq(taxid:int:ncbitaxid\ttaxid:int:ncbitaxid\trelationship)} print qq($F[0]\t$F[1]\tchildof)' $taxodump/nodes.dmp > rels/tax2tax.rel
+perl -aln -F"\\t\\|\\t" -e 'BEGIN{print qq(taxid:int:ncbitaxid\ttaxid:int:ncbitaxid\trelationship\tstartend)} print qq($F[0]\t$F[1]\tchildof\t$F[0]_$F[1]) unless $F[0] == $F[1]' $taxodump/nodes.dmp > rels/tax2tax.rel
 
 #02::gi2taxid##################################################
 #gi:int:giid     taxid:int:ncbitaxid link	
